@@ -63,7 +63,7 @@ jobs:
         run: |
           aws lambda update-function-configuration \
             --function-name ${{ steps.config.outputs.function_name }} \
-            --environment "Variables={ENVIRONMENT=\"${{ steps.config.outputs.stage }}\",CURRENT_AWS_REGION=\"${{ secrets.CURRENT_AWS_REGION }}\",TABLE_USER=\"TMS_USER_${{ steps.config.outputs.stage }}\"}"
+            --environment "Variables={ENVIRONMENT=\"${{ steps.config.outputs.stage }}\",CURRENT_AWS_REGION=\"${{ secrets.CURRENT_AWS_REGION }}\",ACCESS_TOKEN_JWT_SECRET=\"${{ secrets.ACCESS_TOKEN_JWT_SECRET }}\",REFRESH_TOKEN_JWT_SECRET=\"${{ secrets.REFRESH_TOKEN_JWT_SECRET }}\",ACCESS_TOKEN_EXPIRES_IN=\"${{ secrets.ACCESS_TOKEN_EXPIRES_IN }}\",REFRESH_TOKEN_EXPIRES_IN=\"${{ secrets.REFRESH_TOKEN_EXPIRES_IN }}\",TABLE_USER=\"TMS_USER_${{ steps.config.outputs.stage }}\"}"
 
       # 1️⃣1️⃣ Clean up
       - name: Clean up
