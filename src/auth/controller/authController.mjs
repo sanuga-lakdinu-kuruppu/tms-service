@@ -127,6 +127,11 @@ router.post(
             refreshToken: value.refreshToken,
           },
         });
+      } else if (res === RETURN.MALFORMED_TOKEN) {
+        console.log(`malformed token`);
+        return response.status(400).send({
+          msg: "Your token is invalid. Please login again.",
+        });
       } else {
         console.log(`refresh failed`);
         return response.status(500).send({
