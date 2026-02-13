@@ -3,6 +3,10 @@ import bcrypt from "bcrypt";
 import { TOKEN_TYPE } from "../../auth/enum/tokenType.mjs";
 import jwt from "jsonwebtoken";
 
+export const verifyRefreshToken = (token) => {
+  return jwt.verify(token, process.env.REFRESH_TOKEN_JWT_SECRET);
+};
+
 export const generateToken = (userId, role, type) => {
   const payload = {
     userId: userId,

@@ -8,9 +8,33 @@ import {
   hashPassword,
   comparePassword,
   generateToken,
+  verifyRefreshToken,
 } from "../../common/util/util.mjs";
 import { USER_STATUS } from "../../user/enum/userStatus.mjs";
 import { TOKEN_TYPE } from "../enum/tokenType.mjs";
+
+export const handleRefreshToken = async (data) => {
+  try {
+    // verify refresh token
+    const payload = verifyRefreshToken(data.refreshToken);
+
+    // generate token
+    const accessToken = generateToken(
+      payload.userId,
+      payload.role,
+      TOKEN_TYPE.ACCESS
+    );
+    const refreshToken = generateToken(
+      payload.userId,
+      payload.role,
+      TOKEN_TYPE.REFRESH
+    );
+    return { res: RETURN.SUCCESS, value: { accessToken, refreshToken } };
+  } catch (error) {
+    console.log(`error during refresh token processing: ${error}`);
+    return { res: RETURN.FAILED, value: null };
+  }
+};
 
 export const handleLogin = async (data) => {
   // check if user exists
