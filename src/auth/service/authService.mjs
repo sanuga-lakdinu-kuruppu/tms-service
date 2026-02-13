@@ -32,7 +32,7 @@ export const handleRefreshToken = async (data) => {
     return { res: RETURN.SUCCESS, value: { accessToken, refreshToken } };
   } catch (error) {
     console.log(`error during refresh token processing: ${error}`);
-    return { res: RETURN.FAILED, value: null };
+    return { res: RETURN.MALFORMED_TOKEN, value: null };
   }
 };
 
