@@ -69,3 +69,20 @@ export const registerSchema = {
     },
   },
 };
+
+export const loginSchema = {
+  email: {
+    notEmpty: {
+      errorMessage: "Oops! Please enter your email address.",
+    },
+    isEmail: {
+      errorMessage:
+        "Hmm… that doesn’t look like a valid email. Please check and try again.",
+    },
+  },
+  password: {
+    notEmpty: {
+      errorMessage: "Oops! Please enter your password!",
+    },
+  },
+};
