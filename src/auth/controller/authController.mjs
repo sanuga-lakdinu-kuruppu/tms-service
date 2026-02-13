@@ -1,8 +1,16 @@
 import { Router } from "express";
 import { checkSchema, matchedData, validationResult } from "express-validator";
 import { RETURN } from "../../common/error/returnCodes.mjs";
-import { loginSchema, registerSchema } from "../schema/authSchemas.mjs";
-import { handleLogin, handleRegister } from "../service/authService.mjs";
+import {
+  loginSchema,
+  refreshTokenSchema,
+  registerSchema,
+} from "../schema/authSchemas.mjs";
+import {
+  handleLogin,
+  handleRefreshToken,
+  handleRegister,
+} from "../service/authService.mjs";
 
 const router = Router();
 
@@ -88,6 +96,45 @@ router.post(
       }
     } catch (error) {
       console.log(`error during login processing: ${error}`);
+      return response.status(500).send({
+        msg: "Oops! Something went wrong on our end. Please try again later.",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/auth/refresh",
+  checkSchema(refreshTokenSchema),
+  async (request, response) => {
+    try {
+      //request validation
+      const result = validationResult(request);
+      if (!result.isEmpty()) {
+        console.log(`error occured during validation: ${result.errors[0].msg}`);
+        return response.status(400).send({ msg: result.errors[0].msg });
+      }
+      const data = matchedData(request);
+
+      //request processing
+      const { res, value } = await handleRefreshToken(data);
+      if (res === RETURN.SUCCESS) {
+        console.log(`refresh successful`);
+        return response.status(200).send({
+          msg: "You have successfully refreshed.",
+          data: {
+            accessToken: value.accessToken,
+            refreshToken: value.refreshToken,
+          },
+        });
+      } else {
+        console.log(`refresh failed`);
+        return response.status(500).send({
+          msg: "Oops! Something went wrong on our end. Please try again later.",
+        });
+      }
+    } catch (error) {
+      console.log(`error during refresh processing: ${error}`);
       return response.status(500).send({
         msg: "Oops! Something went wrong on our end. Please try again later.",
       });
