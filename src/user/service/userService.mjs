@@ -1,9 +1,45 @@
-import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { ddb } from "../../common/config/db.mjs";
 import { RETURN } from "../../common/error/returnCodes.mjs";
 import { generateUUID } from "../../common/util/util.mjs";
 import { USER_TYPES } from "../enum/userType.mjs";
 import { USER_STATUS } from "../enum/userStatus.mjs";
+
+export const updateUserAfterLogin = async (existingUser) => {
+  const now = new Date().toISOString();
+
+  const params = {
+    TableName: process.env.TABLE_USER,
+    Key: {
+      userId: existingUser.userId,
+      createdAt: existingUser.createdAt,
+    },
+    UpdateExpression: `
+      SET #updatedAt = :updatedAt,
+          #lastLogin = :lastLogin
+      ADD #loginCount :increment
+    `,
+    ExpressionAttributeNames: {
+      "#updatedAt": "updatedAt",
+      "#lastLogin": "lastLogin",
+      "#loginCount": "loginCount",
+    },
+    ExpressionAttributeValues: {
+      ":updatedAt": now,
+      ":lastLogin": now,
+      ":increment": 1,
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  const result = await ddb.send(new UpdateCommand(params));
+  console.log(`user ${existingUser.userId} updated successfully`);
+
+  return {
+    res: RETURN.SUCCESS,
+    value: { user: result.Attributes },
+  };
+};
 
 export const createUser = async ({
   email,

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { checkSchema, matchedData, validationResult } from "express-validator";
 import { RETURN } from "../../common/error/returnCodes.mjs";
-import { registerSchema } from "../schema/authSchemas.mjs";
-import { handleRegister } from "../service/authService.mjs";
+import { loginSchema, registerSchema } from "../schema/authSchemas.mjs";
+import { handleLogin, handleRegister } from "../service/authService.mjs";
 
 const router = Router();
 
@@ -32,12 +32,62 @@ router.post(
           msg: "Email already exists. Please try with a different email.",
         });
       } else {
+        console.log(`register failed`);
         return response.status(500).send({
           msg: "Oops! Something went wrong on our end. Please try again later.",
         });
       }
     } catch (error) {
       console.log(`error during register processing: ${error}`);
+      return response.status(500).send({
+        msg: "Oops! Something went wrong on our end. Please try again later.",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/auth/login",
+  checkSchema(loginSchema),
+  async (request, response) => {
+    try {
+      //request validation
+      const result = validationResult(request);
+      if (!result.isEmpty()) {
+        console.log(`error occured during validation: ${result.errors[0].msg}`);
+        return response.status(400).send({ msg: result.errors[0].msg });
+      }
+      const data = matchedData(request);
+
+      //request processing
+      const { res, value } = await handleLogin(data);
+      if (res === RETURN.SUCCESS) {
+        console.log(`login successful`);
+        return response.status(200).send({
+          msg: "You have successfully logged in.",
+          data: {
+            accessToken: value.accessToken,
+            refreshToken: value.refreshToken,
+          },
+        });
+      } else if (res === RETURN.INVALID_CREDENTIALS) {
+        console.log(`invalid credentials`);
+        return response.status(400).send({
+          msg: "Invalid credentials. Please try again.",
+        });
+      } else if (res === RETURN.USER_NOT_ACTIVE) {
+        console.log(`user ${data.email} is not active`);
+        return response.status(400).send({
+          msg: "Your account is inactive. Please contact the administrator.",
+        });
+      } else {
+        console.log(`login failed`);
+        return response.status(500).send({
+          msg: "Oops! Something went wrong on our end. Please try again later.",
+        });
+      }
+    } catch (error) {
+      console.log(`error during login processing: ${error}`);
       return response.status(500).send({
         msg: "Oops! Something went wrong on our end. Please try again later.",
       });
