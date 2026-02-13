@@ -1,0 +1,6 @@
+export const RETURN = {
+  SUCCESS: "SUCCESS",
+  FAILED: "FAILED",
+  NOT_FOUND: "NOT_FOUND",
+  EMAIL_EXISTS: "EMAIL_EXISTS",
+};
