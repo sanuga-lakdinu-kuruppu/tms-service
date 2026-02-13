@@ -1,0 +1,4 @@
+export const USER_TYPES = {
+  MEMBER: "MEMBER",
+  SUPER_ADMIN: "SUPER_ADMIN",
+};
