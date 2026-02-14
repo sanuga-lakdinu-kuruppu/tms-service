@@ -12,6 +12,17 @@ export const getAllTasks = async (user, limit, startKey) => {
     ExpressionAttributeValues: {
       ":uid": user.userId,
     },
+    ProjectionExpression:
+      "#taskId, #name, #description, #status, #priority, #createdAt, #updatedAt",
+    ExpressionAttributeNames: {
+      "#taskId": "taskId",
+      "#name": "name",
+      "#description": "description",
+      "#status": "status",
+      "#priority": "priority",
+      "#createdAt": "createdAt",
+      "#updatedAt": "updatedAt",
+    },
     Limit: limit,
     ScanIndexForward: false,
   };
@@ -68,6 +79,8 @@ export const createTask = async (data, user) => {
     description: newTask.description,
     priority: newTask.priority,
     status: newTask.status,
+    createdAt: newTask.createdAt,
+    updatedAt: newTask.updatedAt,
   };
 
   console.log(`task ${returnTask.taskId} saved successfully`);
