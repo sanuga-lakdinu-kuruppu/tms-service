@@ -1,8 +1,49 @@
-import { PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  PutCommand,
+  QueryCommand,
+  UpdateCommand,
+  DeleteCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { ddb } from "../../common/config/db.mjs";
 import { RETURN } from "../../common/error/returnCodes.mjs";
 import { generateUUID } from "../../common/util/util.mjs";
 import { TASK_STATUS } from "../enum/taskStatus.mjs";
+
+export const deleteTaskById = async (user, taskId) => {
+  //get task by id
+  const {
+    res,
+    value: { task },
+  } = await getTaskById(taskId);
+  if (res !== RETURN.SUCCESS) {
+    console.log(`task ${taskId} not found :)`);
+    return { res: RETURN.NOT_FOUND, value: { task: null } };
+  }
+
+  //check if user is authorized to delete the task
+  if (task.userId !== user.userId) {
+    console.log(
+      `user ${user.userId} is not authorized to delete task ${taskId} :)`
+    );
+    return { res: RETURN.UNAUTHORIZED, value: { task: null } };
+  }
+
+  //delete task
+  const deleteParams = {
+    TableName: process.env.TABLE_TASK,
+    Key: {
+      taskId: task.taskId,
+      createdAt: task.createdAt,
+    },
+  };
+
+  await ddb.send(new DeleteCommand(deleteParams));
+  console.log(`task ${taskId} deleted successfully :)`);
+  return {
+    res: RETURN.SUCCESS,
+    value: { taskId: taskId },
+  };
+};
 
 export const updateTaskById = async (user, data, taskId) => {
   //get task by id
