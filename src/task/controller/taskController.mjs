@@ -4,13 +4,13 @@ import { RETURN } from "../../common/error/returnCodes.mjs";
 import { USER_TYPES } from "../../user/enum/userType.mjs";
 import { protectRoute } from "../../auth/middleware/authMiddleware.mjs";
 import { createTaskSchema } from "../schema/taskSchemas.mjs";
-import { createTask } from "../service/taskService.mjs";
+import { createTask, getAllTasks } from "../service/taskService.mjs";
 
 const router = Router();
 
 router.post(
   "/v1/tasks",
-  protectRoute([USER_TYPES.MEMBER, USER_TYPES.SUPER_ADMIN]),
+  protectRoute([USER_TYPES.MEMBER]),
   checkSchema(createTaskSchema),
   async (request, response) => {
     try {
@@ -41,6 +41,43 @@ router.post(
       }
     } catch (error) {
       console.log(`error during task creation: ${error}`);
+      return response.status(500).send({
+        msg: "Oops! Something went wrong on our end. Please try again later.",
+      });
+    }
+  }
+);
+
+router.get(
+  "/v1/tasks",
+  protectRoute([USER_TYPES.MEMBER]),
+  async (request, response) => {
+    try {
+      const { user } = request;
+      const limit = parseInt(request.query.limit) || 10;
+      const startKey = request.query.startKey || null;
+
+      //request processing
+      const { res, value } = await getAllTasks(user, limit, startKey);
+      if (res === RETURN.SUCCESS) {
+        console.log(`task retriving process successfull :)`);
+        return response.status(200).send({
+          msg: "Task retriving successfully",
+          data: {
+            tasks: value.tasks,
+            limit: limit,
+            nextToken: value.nextToken,
+            hasMore: !!value.nextToken,
+          },
+        });
+      } else {
+        console.log(`task retriving process unsuccessfull :)`);
+        return response.status(500).send({
+          msg: "Oops! Something went wrong on our end. Please try again later.",
+        });
+      }
+    } catch (error) {
+      console.log(`Error during task retriving process: ${error}`);
       return response.status(500).send({
         msg: "Oops! Something went wrong on our end. Please try again later.",
       });
