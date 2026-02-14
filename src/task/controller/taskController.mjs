@@ -184,7 +184,7 @@ router.delete(
   }
 );
 
-router.all("/tasks", (request, response) => {
+router.all("/v1/tasks", (request, response) => {
   console.log(`method not allowed :)`);
   return response.status(405).send({ error: "method not allowed" });
 });
