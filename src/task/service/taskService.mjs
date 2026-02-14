@@ -1,8 +1,45 @@
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddb } from "../../common/config/db.mjs";
 import { RETURN } from "../../common/error/returnCodes.mjs";
 import { generateUUID } from "../../common/util/util.mjs";
 import { TASK_STATUS } from "../enum/taskStatus.mjs";
+
+export const getAllTasks = async (user, limit, startKey) => {
+  const params = {
+    TableName: process.env.TABLE_TASK,
+    IndexName: "userIdCreatedAtIndex",
+    KeyConditionExpression: "userId = :uid",
+    ExpressionAttributeValues: {
+      ":uid": user.userId,
+    },
+    Limit: limit,
+    ScanIndexForward: false,
+  };
+
+  if (startKey) {
+    try {
+      params.ExclusiveStartKey = JSON.parse(decodeURIComponent(startKey));
+    } catch (error) {
+      return {
+        res: RETURN.SUCCESS,
+        value: { tasks: [], nextToken: null },
+      };
+    }
+  }
+
+  const result = await ddb.send(new QueryCommand(params));
+
+  console.log(`tasks retrived successfully :)`);
+  return {
+    res: RETURN.SUCCESS,
+    value: {
+      tasks: result.Items,
+      nextToken: result.LastEvaluatedKey
+        ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey))
+        : null,
+    },
+  };
+};
 
 export const createTask = async (data, user) => {
   const now = new Date().toISOString();
