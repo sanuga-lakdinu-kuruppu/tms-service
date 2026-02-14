@@ -5,6 +5,32 @@ import { generateUUID } from "../../common/util/util.mjs";
 import { USER_TYPES } from "../enum/userType.mjs";
 import { USER_STATUS } from "../enum/userStatus.mjs";
 
+export const getUserById = async (userId) => {
+  const params = {
+    TableName: process.env.TABLE_USER,
+    KeyConditionExpression: "userId = :uid",
+    ExpressionAttributeValues: {
+      ":uid": userId,
+    },
+    Limit: 1,
+    ScanIndexForward: false,
+  };
+
+  const result = await ddb.send(new QueryCommand(params));
+  if (!result.Items || result.Items.length === 0) {
+    console.log(`user ${userId} not found :)`);
+    return {
+      res: RETURN.NOT_FOUND,
+      value: { user: null },
+    };
+  }
+
+  return {
+    res: RETURN.SUCCESS,
+    value: { user: result.Items[0] },
+  };
+};
+
 export const updateUserAfterLogin = async (existingUser) => {
   const now = new Date().toISOString();
 
