@@ -71,13 +71,23 @@ router.post(
       const { res, value } = await handleLogin(data);
       if (res === RETURN.SUCCESS) {
         console.log(`login successful`);
-        return response.status(200).send({
-          msg: "You have successfully logged in.",
-          data: {
-            accessToken: value.accessToken,
-            refreshToken: value.refreshToken,
-          },
+        response.cookie("accessToken", value.accessToken, {
+          httpOnly: true,
+          secure: process.env.ENVIRONMENT === "PROD",
+          sameSite: "Lax",
+          maxAge: 30 * 60 * 1000,
+          path: "/",
         });
+
+        response.cookie("refreshToken", value.refreshToken, {
+          httpOnly: true,
+          secure: process.env.ENVIRONMENT === "PROD",
+          sameSite: "Lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/",
+        });
+
+        return response.status(200).json({ msg: "Login successful" });
       } else if (res === RETURN.INVALID_CREDENTIALS) {
         console.log(`invalid credentials`);
         return response.status(400).send({
@@ -120,13 +130,23 @@ router.post(
       const { res, value } = await handleRefreshToken(data);
       if (res === RETURN.SUCCESS) {
         console.log(`refresh successful`);
-        return response.status(200).send({
-          msg: "You have successfully refreshed.",
-          data: {
-            accessToken: value.accessToken,
-            refreshToken: value.refreshToken,
-          },
+        response.cookie("accessToken", value.accessToken, {
+          httpOnly: true,
+          secure: process.env.ENVIRONMENT === "PROD",
+          sameSite: "Lax",
+          maxAge: 30 * 60 * 1000,
+          path: "/",
         });
+
+        response.cookie("refreshToken", value.refreshToken, {
+          httpOnly: true,
+          secure: process.env.ENVIRONMENT === "PROD",
+          sameSite: "Lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/",
+        });
+
+        return response.status(200).json({ msg: "Refresh successful" });
       } else if (res === RETURN.MALFORMED_TOKEN) {
         console.log(`malformed token`);
         return response.status(400).send({
