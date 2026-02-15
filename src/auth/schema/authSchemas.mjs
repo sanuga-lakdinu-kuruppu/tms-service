@@ -86,11 +86,3 @@ export const loginSchema = {
     },
   },
 };
-
-export const refreshTokenSchema = {
-  refreshToken: {
-    notEmpty: {
-      errorMessage: "Oops! Please enter your refresh token!",
-    },
-  },
-};
