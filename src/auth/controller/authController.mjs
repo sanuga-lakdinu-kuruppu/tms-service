@@ -177,6 +177,8 @@ router.post("/v1/auth/logout", async (request, response) => {
       httpOnly: true,
       secure: process.env.ENVIRONMENT === "PROD",
       sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
+      domain:
+        process.env.ENVIRONMENT === "PROD" ? ".halfliferoi.online" : undefined,
       maxAge: 0,
       path: "/",
     });
@@ -185,6 +187,8 @@ router.post("/v1/auth/logout", async (request, response) => {
       httpOnly: true,
       secure: process.env.ENVIRONMENT === "PROD",
       sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
+      domain:
+        process.env.ENVIRONMENT === "PROD" ? ".halfliferoi.online" : undefined,
       maxAge: 0,
       path: "/",
     });
