@@ -74,7 +74,7 @@ router.post(
         response.cookie("accessToken", value.accessToken, {
           httpOnly: true,
           secure: process.env.ENVIRONMENT === "PROD",
-          sameSite: "Lax",
+          sameSite: "none",
           maxAge: 30 * 60 * 1000,
           path: "/",
         });
@@ -82,7 +82,7 @@ router.post(
         response.cookie("refreshToken", value.refreshToken, {
           httpOnly: true,
           secure: process.env.ENVIRONMENT === "PROD",
-          sameSite: "Lax",
+          sameSite: "none",
           maxAge: 7 * 24 * 60 * 60 * 1000,
           path: "/",
         });
@@ -113,59 +113,78 @@ router.post(
   }
 );
 
-router.post(
-  "/v1/auth/refresh",
-  checkSchema(refreshTokenSchema),
-  async (request, response) => {
-    try {
-      //request validation
-      const result = validationResult(request);
-      if (!result.isEmpty()) {
-        console.log(`error occured during validation: ${result.errors[0].msg}`);
-        return response.status(400).send({ msg: result.errors[0].msg });
-      }
-      const data = matchedData(request);
+router.post("/v1/auth/refresh", async (request, response) => {
+  try {
+    const { refreshToken } = request.cookies;
+    if (!refreshToken)
+      return response.status(400).json({ msg: "Refresh token required" });
 
-      //request processing
-      const { res, value } = await handleRefreshToken(data);
-      if (res === RETURN.SUCCESS) {
-        console.log(`refresh successful`);
-        response.cookie("accessToken", value.accessToken, {
-          httpOnly: true,
-          secure: process.env.ENVIRONMENT === "PROD",
-          sameSite: "Lax",
-          maxAge: 30 * 60 * 1000,
-          path: "/",
-        });
+    const { res, value } = await handleRefreshToken({ refreshToken });
+    if (res === RETURN.SUCCESS) {
+      console.log(`refresh successful`);
+      response.cookie("accessToken", value.accessToken, {
+        httpOnly: true,
+        secure: process.env.ENVIRONMENT === "PROD",
+        sameSite: "none",
+        maxAge: 30 * 60 * 1000,
+        path: "/",
+      });
 
-        response.cookie("refreshToken", value.refreshToken, {
-          httpOnly: true,
-          secure: process.env.ENVIRONMENT === "PROD",
-          sameSite: "Lax",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-          path: "/",
-        });
+      response.cookie("refreshToken", value.refreshToken, {
+        httpOnly: true,
+        secure: process.env.ENVIRONMENT === "PROD",
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
 
-        return response.status(200).json({ msg: "Refresh successful" });
-      } else if (res === RETURN.MALFORMED_TOKEN) {
-        console.log(`malformed token`);
-        return response.status(400).send({
-          msg: "Your token is invalid. Please login again.",
-        });
-      } else {
-        console.log(`refresh failed`);
-        return response.status(500).send({
-          msg: "Oops! Something went wrong on our end. Please try again later.",
-        });
-      }
-    } catch (error) {
-      console.log(`error during refresh processing: ${error}`);
+      return response.status(200).json({ msg: "Refresh successful" });
+    } else if (res === RETURN.MALFORMED_TOKEN) {
+      console.log(`malformed token`);
+      return response.status(400).send({
+        msg: "Your token is invalid. Please login again.",
+      });
+    } else {
+      console.log(`refresh failed`);
       return response.status(500).send({
         msg: "Oops! Something went wrong on our end. Please try again later.",
       });
     }
+  } catch (error) {
+    console.log(`error during refresh processing: ${error}`);
+    return response.status(500).send({
+      msg: "Oops! Something went wrong on our end. Please try again later.",
+    });
   }
-);
+});
+
+router.post("/v1/auth/logout", async (request, response) => {
+  try {
+    console.log(`logout successful`);
+    response.cookie("accessToken", "", {
+      httpOnly: true,
+      secure: process.env.ENVIRONMENT === "PROD",
+      sameSite: "none",
+      maxAge: 0,
+      path: "/",
+    });
+
+    response.cookie("refreshToken", "", {
+      httpOnly: true,
+      secure: process.env.ENVIRONMENT === "PROD",
+      sameSite: "none",
+      maxAge: 0,
+      path: "/",
+    });
+
+    return response.status(200).json({ msg: "Logout successful" });
+  } catch (error) {
+    console.log(`error during logout processing: ${error}`);
+    return response.status(500).send({
+      msg: "Oops! Something went wrong on our end. Please try again later.",
+    });
+  }
+});
 
 router.all("/v1/auth", (request, response) => {
   console.log(`method not allowed :)`);
