@@ -10,12 +10,14 @@ import {
   getAllTasks,
   updateTaskById,
 } from "../service/taskService.mjs";
+import { csrfProtection } from "../../common/middleware/commonMiddleware.mjs";
 
 const router = Router();
 
 router.post(
   "/v1/tasks",
   protectRoute([USER_TYPES.MEMBER]),
+  csrfProtection,
   checkSchema(createTaskSchema),
   async (request, response) => {
     try {
@@ -93,6 +95,7 @@ router.get(
 router.put(
   "/v1/tasks/:taskId",
   protectRoute([USER_TYPES.MEMBER]),
+  csrfProtection,
   checkSchema(updateTaskSchema),
   async (request, response) => {
     try {
@@ -144,6 +147,7 @@ router.put(
 router.delete(
   "/v1/tasks/:taskId",
   protectRoute([USER_TYPES.MEMBER]),
+  csrfProtection,
   async (request, response) => {
     try {
       const { user } = request;
