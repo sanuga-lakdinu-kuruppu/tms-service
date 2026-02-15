@@ -74,7 +74,7 @@ router.post(
         response.cookie("accessToken", value.accessToken, {
           httpOnly: true,
           secure: process.env.ENVIRONMENT === "PROD",
-          sameSite: "none",
+          sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
           maxAge: 30 * 60 * 1000,
           path: "/",
         });
@@ -82,7 +82,7 @@ router.post(
         response.cookie("refreshToken", value.refreshToken, {
           httpOnly: true,
           secure: process.env.ENVIRONMENT === "PROD",
-          sameSite: "none",
+          sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
           maxAge: 7 * 24 * 60 * 60 * 1000,
           path: "/",
         });
@@ -125,7 +125,7 @@ router.post("/v1/auth/refresh", async (request, response) => {
       response.cookie("accessToken", value.accessToken, {
         httpOnly: true,
         secure: process.env.ENVIRONMENT === "PROD",
-        sameSite: "none",
+        sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
         maxAge: 30 * 60 * 1000,
         path: "/",
       });
@@ -133,7 +133,7 @@ router.post("/v1/auth/refresh", async (request, response) => {
       response.cookie("refreshToken", value.refreshToken, {
         httpOnly: true,
         secure: process.env.ENVIRONMENT === "PROD",
-        sameSite: "none",
+        sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: "/",
       });
@@ -164,7 +164,7 @@ router.post("/v1/auth/logout", async (request, response) => {
     response.cookie("accessToken", "", {
       httpOnly: true,
       secure: process.env.ENVIRONMENT === "PROD",
-      sameSite: "none",
+      sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
       maxAge: 0,
       path: "/",
     });
@@ -172,7 +172,7 @@ router.post("/v1/auth/logout", async (request, response) => {
     response.cookie("refreshToken", "", {
       httpOnly: true,
       secure: process.env.ENVIRONMENT === "PROD",
-      sameSite: "none",
+      sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
       maxAge: 0,
       path: "/",
     });
