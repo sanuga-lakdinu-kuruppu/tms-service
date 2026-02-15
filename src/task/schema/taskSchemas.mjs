@@ -34,6 +34,7 @@ export const createTaskSchema = {
     trim: true,
   },
   priority: {
+    in: ["body"],
     notEmpty: {
       errorMessage: "Oops! Please enter the task priority.",
     },
@@ -79,6 +80,7 @@ export const updateTaskSchema = {
     trim: true,
   },
   priority: {
+    in: ["body"],
     notEmpty: {
       errorMessage: "Oops! Please enter the task priority.",
     },
