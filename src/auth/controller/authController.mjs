@@ -149,7 +149,7 @@ router.post(
 
 router.all("/v1/auth", (request, response) => {
   console.log(`method not allowed :)`);
-  return response.status(405).send({ error: "method not allowed" });
+  return response.status(405).send({ msg: "method not allowed" });
 });
 
 export default router;
