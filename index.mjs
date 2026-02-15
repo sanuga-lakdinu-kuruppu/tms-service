@@ -12,9 +12,9 @@ app.use(express.json());
 app.use(cors());
 app.use(router);
 
-app.get("/v1/health", (req, res) => {
-  res.status(200).send("tms-service is up and running :)");
-});
+// app.get("/v1/health", (req, res) => {
+//   res.status(200).send("tms-service is up and running :)");
+// });
 
 // use this for local development
 // const PORT = process.env.PORT || 6006;

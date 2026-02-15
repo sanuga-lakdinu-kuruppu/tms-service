@@ -102,7 +102,7 @@ router.put(
         console.log(
           `error occured during validation: ${result.errors[0].msg} :)`
         );
-        return response.status(400).send({ error: result.errors[0].msg });
+        return response.status(400).send({ msg: result.errors[0].msg });
       }
       const data = matchedData(request);
       const { user } = request;
@@ -186,7 +186,7 @@ router.delete(
 
 router.all("/v1/tasks", (request, response) => {
   console.log(`method not allowed :)`);
-  return response.status(405).send({ error: "method not allowed" });
+  return response.status(405).send({ msg: "method not allowed" });
 });
 
 export default router;
