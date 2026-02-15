@@ -1,11 +1,7 @@
 import { Router } from "express";
 import { checkSchema, matchedData, validationResult } from "express-validator";
 import { RETURN } from "../../common/error/returnCodes.mjs";
-import {
-  loginSchema,
-  refreshTokenSchema,
-  registerSchema,
-} from "../schema/authSchemas.mjs";
+import { loginSchema, registerSchema } from "../schema/authSchemas.mjs";
 import {
   handleLogin,
   handleRefreshToken,
@@ -75,6 +71,10 @@ router.post(
           httpOnly: true,
           secure: process.env.ENVIRONMENT === "PROD",
           sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
+          domain:
+            process.env.ENVIRONMENT === "PROD"
+              ? ".halfliferoi.online"
+              : undefined,
           maxAge: 30 * 60 * 1000,
           path: "/",
         });
@@ -83,6 +83,10 @@ router.post(
           httpOnly: true,
           secure: process.env.ENVIRONMENT === "PROD",
           sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
+          domain:
+            process.env.ENVIRONMENT === "PROD"
+              ? ".halfliferoi.online"
+              : undefined,
           maxAge: 7 * 24 * 60 * 60 * 1000,
           path: "/",
         });
@@ -126,6 +130,10 @@ router.post("/v1/auth/refresh", async (request, response) => {
         httpOnly: true,
         secure: process.env.ENVIRONMENT === "PROD",
         sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
+        domain:
+          process.env.ENVIRONMENT === "PROD"
+            ? ".halfliferoi.online"
+            : undefined,
         maxAge: 30 * 60 * 1000,
         path: "/",
       });
@@ -134,6 +142,10 @@ router.post("/v1/auth/refresh", async (request, response) => {
         httpOnly: true,
         secure: process.env.ENVIRONMENT === "PROD",
         sameSite: process.env.ENVIRONMENT === "PROD" ? "none" : "lax",
+        domain:
+          process.env.ENVIRONMENT === "PROD"
+            ? ".halfliferoi.online"
+            : undefined,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: "/",
       });
