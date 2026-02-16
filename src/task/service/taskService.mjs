@@ -9,6 +9,72 @@ import { RETURN } from "../../common/error/returnCodes.mjs";
 import { generateUUID } from "../../common/util/util.mjs";
 import { TASK_STATUS } from "../enum/taskStatus.mjs";
 
+export const createTasksBatch = async (tasks, user) => {
+  const now = new Date().toISOString();
+
+  const results = [];
+  let successCount = 0;
+  let failedCount = 0;
+
+  for (const taskData of tasks) {
+    try {
+      const newTask = {
+        taskId: generateUUID(),
+        userId: user.userId,
+        createdAt: now,
+        updatedAt: now,
+        name: taskData.name,
+        description: taskData.description,
+        priority: taskData.priority,
+        status: TASK_STATUS.CREATED,
+      };
+
+      await ddb.send(
+        new PutCommand({
+          TableName: process.env.TABLE_TASK,
+          Item: newTask,
+        })
+      );
+
+      results.push({
+        status: "success",
+        task: {
+          taskId: newTask.taskId,
+          name: newTask.name,
+          description: newTask.description,
+          priority: newTask.priority,
+          status: newTask.status,
+          createdAt: newTask.createdAt,
+          updatedAt: newTask.updatedAt,
+        },
+      });
+
+      successCount++;
+      console.log(`task ${newTask.taskId} saved successfully :)`);
+    } catch (error) {
+      console.log(`task creation failed during batch: ${error}`);
+
+      results.push({
+        status: "failed",
+        error: "Task creation failed",
+        input: taskData,
+      });
+
+      failedCount++;
+    }
+  }
+
+  return {
+    res: RETURN.SUCCESS,
+    value: {
+      totalRequested: tasks.length,
+      successCount,
+      failedCount,
+      results,
+    },
+  };
+};
+
 export const deleteTaskById = async (user, taskId) => {
   //get task by id
   const {

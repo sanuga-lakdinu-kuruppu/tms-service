@@ -3,9 +3,14 @@ import { checkSchema, matchedData, validationResult } from "express-validator";
 import { RETURN } from "../../common/error/returnCodes.mjs";
 import { USER_TYPES } from "../../user/enum/userType.mjs";
 import { protectRoute } from "../../auth/middleware/authMiddleware.mjs";
-import { createTaskSchema, updateTaskSchema } from "../schema/taskSchemas.mjs";
+import {
+  batchCreateTaskSchema,
+  createTaskSchema,
+  updateTaskSchema,
+} from "../schema/taskSchemas.mjs";
 import {
   createTask,
+  createTasksBatch,
   deleteTaskById,
   getAllTasks,
   updateTaskById,
@@ -48,6 +53,53 @@ router.post(
       }
     } catch (error) {
       console.log(`error during task creation: ${error}`);
+      return response.status(500).send({
+        msg: "Oops! Something went wrong on our end. Please try again later.",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/tasks/batch",
+  protectRoute([USER_TYPES.MEMBER]),
+  csrfProtection,
+  checkSchema(batchCreateTaskSchema),
+  async (request, response) => {
+    try {
+      const result = validationResult(request);
+      if (!result.isEmpty()) {
+        console.log(`validation errors occured :)`);
+
+        return response.status(400).send({
+          msg: "Validation failed",
+          errors: result.array().map((err) => ({
+            field: err.path,
+            message: err.msg,
+            location: err.location,
+          })),
+        });
+      }
+
+      const { tasks } = request.body;
+      const { user } = request;
+
+      const { res, value } = await createTasksBatch(tasks, user);
+
+      if (res === RETURN.SUCCESS) {
+        console.log(`batch task creation processed successfully :)`);
+        return response.status(200).send({
+          msg: "Batch task creation processed successfully.",
+          data: value,
+        });
+      } else {
+        console.log(`batch task creation failed :)`);
+        return response.status(500).send({
+          msg: "Oops! Something went wrong on our end. Please try again later.",
+        });
+      }
+    } catch (error) {
+      console.log(`error during batch task creation: ${error}`);
       return response.status(500).send({
         msg: "Oops! Something went wrong on our end. Please try again later.",
       });
