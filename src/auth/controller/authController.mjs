@@ -75,7 +75,7 @@ router.post(
             process.env.ENVIRONMENT === "PROD"
               ? ".halfliferoi.online"
               : undefined,
-          maxAge: 30 * 60 * 1000,
+          maxAge: 60 * 60 * 1000,
           path: "/",
         });
 
@@ -134,7 +134,7 @@ router.post("/v1/auth/refresh", async (request, response) => {
           process.env.ENVIRONMENT === "PROD"
             ? ".halfliferoi.online"
             : undefined,
-        maxAge: 30 * 60 * 1000,
+        maxAge: 60 * 60 * 1000,
         path: "/",
       });
 
